@@ -2386,6 +2386,8 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
+    int i;
+    char *colval;
 	xw.l = xw.t = 0;
 	xw.isfixed = False;
 	xsetcursor(cursorstyle);
@@ -2437,6 +2439,11 @@ main(int argc, char *argv[])
 		defaultfontsize = strtod(EARGF(usage()), NULL);
 		if (!(defaultfontsize > 0))
 			usage();
+    break;
+  case 'C':
+    colval = strtok(EARGF(usage()), "@");
+    i = atoi(strtok(NULL, "@"));
+    colorname[i] = colval;
 		break;
 	default:
 		usage();
