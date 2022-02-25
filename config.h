@@ -228,6 +228,10 @@ static char *grab_link[] = { "/bin/sh", "-c",
 	"~/.config/st/grab_link",
 	"grab_link", NULL };
 
+static char *change_theme[] = { "/bin/sh", "-c",
+	"~/.config/st/change_theme",
+	"change_theme", NULL };
+
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
@@ -253,6 +257,7 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_X,           refreshxrandr,  {.i =  0} },
 	{ TERMMOD,              XK_E,           externalpipe,   {.v = edit_screen} },
 	{ TERMMOD,              XK_G,           externalpipe,   {.v = grab_link} },
+	{ TERMMOD,              XK_T,           externalpipe,   {.v = change_theme} },
 	{ MODKEY,               XK_Escape,      normalMode,     {.i =  0} },
  	{ MODKEY|ShiftMask,     XK_F1,          loadpalette,    {.i =  1} },
  	{ MODKEY|ShiftMask,     XK_F2,          savepalette,    {}        },
