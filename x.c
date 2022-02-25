@@ -75,7 +75,7 @@ static void selpaste(const Arg *);
 static void zoom(const Arg *);
 static void zoomabs(const Arg *);
 static void zoomreset(const Arg *);
-static void loadpalette();
+static void loadpalette(const Arg *);
 static void savepalette();
 static void setpalette(const Arg *);
 static void ttysend(const Arg *);
@@ -2387,7 +2387,7 @@ savepalette()
 }
 
 void
-loadpalette()
+loadpalette(const Arg* arg)
 {
   FILE *fp;
   char name[128];
@@ -2402,6 +2402,12 @@ loadpalette()
     fclose(fp);
   }
   colorname = (const char**)palette[colorindex];
+
+  if (arg->i == 1){
+    fprintf(stdout, "load cols\n");
+    xloadcols();
+    cresize(win.w, win.h);
+  }
 }
 
 void
@@ -2481,8 +2487,10 @@ main(int argc, char *argv[])
 		usage();
 	} ARGEND;
 
+    Arg _a;
+    _a.i = 0;
 run:
-    loadpalette();
+    loadpalette(&_a);
 
 	if (argc > 0) /* eat all remaining arguments */
 		opt_cmd = argv;
