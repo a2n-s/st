@@ -5,6 +5,7 @@
 #include <locale.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/select.h>
 #include <time.h>
 #include <unistd.h>
@@ -74,6 +75,8 @@ static void selpaste(const Arg *);
 static void zoom(const Arg *);
 static void zoomabs(const Arg *);
 static void zoomreset(const Arg *);
+static void loadpalette();
+static void savepalette();
 static void setpalette(const Arg *);
 static void ttysend(const Arg *);
 static void cyclefonts(const Arg *);
@@ -2367,7 +2370,43 @@ usage(void)
 	    " [stty_args ...]\n", argv0, argv0);
 }
 
-void setpalette(const Arg *arg) {
+void
+savepalette()
+{
+  FILE *fp;
+  char buff[255];
+  fp = fopen(themefile, "w+");
+  if (fp == NULL)
+  {
+    perror("Error while opening the file.\n");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(buff, "%d %s", colorindex, colorname[20]);
+  fputs(buff, fp);
+  fclose(fp);
+}
+
+void
+loadpalette()
+{
+  FILE *fp;
+  char name[128];
+  fp = fopen(themefile, "r");
+  if (fp == NULL)
+  {
+    fprintf(stderr, "Error while opening %s.\n", themefile);
+    perror("");
+    colorindex = 0;
+  } else {
+    fscanf(fp, "%d %s", &colorindex, name);
+    fclose(fp);
+  }
+  colorname = (const char**)palette[colorindex];
+}
+
+void
+setpalette(const Arg *arg)
+{
     colorindex = colorindex + arg->i;
     if (colorindex < 0) colorindex = LEN(palette) - 1;
     if (colorindex > LEN(palette) - 1) colorindex = 0;
@@ -2443,7 +2482,7 @@ main(int argc, char *argv[])
 	} ARGEND;
 
 run:
-    colorname = palette[0];
+    loadpalette();
 
 	if (argc > 0) /* eat all remaining arguments */
 		opt_cmd = argv;

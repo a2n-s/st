@@ -1,5 +1,5 @@
 /* See LICENSE file for copyright and license details. */
-
+static char* themefile = "/home/ants/.config/st/theme.txt";
 /*
  * appearance
  *
@@ -254,6 +254,8 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_E,           externalpipe,   {.v = edit_screen} },
 	{ TERMMOD,              XK_G,           externalpipe,   {.v = grab_link} },
 	{ MODKEY,               XK_Escape,      normalMode,     {.i =  0} },
+ 	{ MODKEY|ShiftMask,     XK_F1,          loadpalette,    {}        },
+ 	{ MODKEY|ShiftMask,     XK_F2,          savepalette,    {}        },
  	{ MODKEY,               XK_F1,          setpalette,     {.i = -1} },
  	{ MODKEY,               XK_F2,          setpalette,     {.i = +1} },
 };
