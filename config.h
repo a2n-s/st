@@ -6,6 +6,7 @@ static char* themefile = "/home/ants/.config/st/theme.txt";
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
 static char *fonts[] = {
+	"mononoki Nerd Font-16",
 	"Liberation Mono:pixelsize=12:antialias=true:autohint=true",
 	"Gohu GohuFont:pixelsize=11:antialias=false:autohint=false",
 };
