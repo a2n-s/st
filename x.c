@@ -2368,7 +2368,9 @@ usage(void)
 }
 
 void setpalette(const Arg *arg) {
-    colorindex = (colorindex + arg->i) % LEN(palette);
+    colorindex = colorindex + arg->i;
+    if (colorindex < 0) colorindex = LEN(palette) - 1;
+    if (colorindex > LEN(palette) - 1) colorindex = 0;
     colorname = palette[colorindex];
     xloadcols();
     cresize(win.w, win.h);
