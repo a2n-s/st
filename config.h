@@ -5,7 +5,11 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+static char *fonts[] = {
+	"Liberation Mono:pixelsize=12:antialias=true:autohint=true",
+	"Gohu GohuFont:pixelsize=11:antialias=false:autohint=false",
+};
+static size_t currentfont = 0;
 static int borderpx = 2;
 
 /*
@@ -229,6 +233,7 @@ static Shortcut shortcuts[] = {
   { TERMMOD,              XK_K,           kscrollup,      {.i = -1} },
   { TERMMOD,              XK_J,           kscrolldown,    {.i = -1} },
   { TERMMOD,              XK_I,           iso14755,       {.i =  0} },
+	{ TERMMOD,              XK_S,           cyclefonts,     {}        },
 };
 
 /*
