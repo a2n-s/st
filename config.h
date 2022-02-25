@@ -225,6 +225,14 @@ static MouseShortcut mshortcuts[] = {
 	{ XK_ANY_MOD,           Button5, ttysend,        {.s = "\005"} },
 };
 
+static char *edit_screen[] = { "/bin/sh", "-c",
+	"~/.config/st/edit_screen",
+	"edit_screen", NULL };
+
+static char *grab_link[] = { "/bin/sh", "-c",
+	"~/.config/st/grab_link",
+	"grab_link", NULL };
+
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
@@ -248,6 +256,8 @@ static Shortcut shortcuts[] = {
   { TERMMOD,              XK_I,           iso14755,       {.i =  0} },
 	{ TERMMOD,              XK_S,           cyclefonts,     {}        },
 	{ TERMMOD,              XK_X,           refreshxrandr,  {.i =  0} },
+	{ TERMMOD,              XK_E,           externalpipe,   {.v = edit_screen} },
+	{ TERMMOD,              XK_G,           externalpipe,   {.v = grab_link} },
 };
 
 /*
