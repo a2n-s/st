@@ -141,11 +141,11 @@ unsigned int defaultbg = 16;
 unsigned int defaultcs = 17;
 static unsigned int defaultrcs = 17;
 
-unsigned int const currentBg = 6, buffSize = 2048;
+unsigned int const currentBg = 18, buffSize = 2048;
 /// Enable double / triple click yanking / selection of word / line.
 int const mouseYank = 1, mouseSelect = 0;
 /// [Vim Browse] Colors for search results currently on screen.
-unsigned int const highlightBg = 4, highlightFg = 15;
+unsigned int const highlightBg = 1, highlightFg = 18;
 char const wDelS[] = "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", wDelL[] = " \t";
 char *nmKeys [] = {              ///< Shortcusts executed in normal mode
   "R/Building\nN", "r/Building\n", "X/juli@machine\nN", "x/juli@machine\n",
