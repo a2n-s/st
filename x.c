@@ -838,7 +838,30 @@ sixd_to_16bit(int x)
 int
 xloadcolor(int i, const char *name, Color *ncolor)
 {
-  if (!name) name = colorname[i];
+	XRenderColor color = { .alpha = 0xffff };
+
+	if (!name) {
+    // should be 16, 255, but I use two extra colors
+    // slots at index 16 and 17 for the foreground (fg)
+    // and background (bg) colors.
+		if (BETWEEN(i, 18, 257)) { /* 256 color */
+      // need to subtract 2 from i each time to fall
+      // between the 16, 255 range, otherwise the
+      // computations remain the same.
+			if (i-2 < 6*6*6+16) { /* same colors as xterm */
+				color.red   = sixd_to_16bit( ((i-2-16)/36)%6 );
+				color.green = sixd_to_16bit( ((i-2-16)/6) %6 );
+				color.blue  = sixd_to_16bit( ((i-2-16)/1) %6 );
+			} else { /* greyscale */
+				color.red = 0x0808 + 0x0a0a * (i-2 - (6*6*6+16));
+				color.green = color.blue = color.red;
+			}
+			return XftColorAllocValue(xw.dpy, xw.vis,
+			                          xw.cmap, &color, ncolor);
+		} else
+			name = colorname[i];
+	}
+
 	return XftColorAllocName(xw.dpy, xw.vis, xw.cmap, name, ncolor);
 }
 
@@ -855,7 +878,11 @@ xloadcols(void)
 		for (cp = dc.col; cp < &dc.col[dc.collen]; ++cp)
 			XftColorFree(xw.dpy, xw.vis, xw.cmap, cp);
 	} else {
-		dc.collen = 18;
+    // should be 256 instead of 258 as st is a 256 terminal
+    // emulator, however I implemented a big palette with 18
+    // colors, i.e. 2 extra fg and bg colors on top of the 16
+    // colors stack.
+		dc.collen = MAX(LEN(colorname), 258);
 		dc.col = xmalloc(dc.collen * sizeof(Color));
 	}
 
@@ -2515,7 +2542,6 @@ loadpalette(const Arg* arg)
   colorname = (const char**)palette[colorindex];
 
   if (arg->i == 1){
-    fprintf(stdout, "load cols\n");
     xloadcols();
     cresize(win.w, win.h);
   }
