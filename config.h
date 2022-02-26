@@ -1,5 +1,5 @@
 /* See LICENSE file for copyright and license details. */
-static char* themefile = "/home/ants/.config/st/theme.txt";
+static char* themefile = "~/.config/st/theme.txt";
 /*
  * appearance
  *
