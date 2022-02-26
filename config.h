@@ -83,7 +83,7 @@ static unsigned int blinktimeout = 800;
 /*
  * thickness of underline and bar cursors
  */
-static unsigned int cursorthickness = 2;
+static unsigned int cursorthickness = 4;
 
 /*
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
@@ -98,7 +98,7 @@ static int vbelltimeout = 150;
 #define VBCELL x==0 || x==right || y==0 || y==bottom  /* border */
 // #define VBCELL 1  /* all cells - whole screen */
 // #define VBCELL y==bottom && x>right-2  /* bottom-right */
-static int vbellmode = 1;
+static int vbellmode = 0;
 /* vbellmode: 0: invert cells. 1: draw a circle with these parameters:
  * - base and outline colors (colorname index - see below)
  * - radius: relative to window width, or if negative: relative to cell-width
@@ -235,35 +235,33 @@ static char *change_theme[] = { "/bin/sh", "-c",
 
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
-#define TERMMOD (ControlMask|ShiftMask)
+#define TERMMOD (Mod1Mask|ShiftMask)
 
 static Shortcut shortcuts[] = {
-	/* mask                 keysym          function        argument */
-	{ XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
-	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
-	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
-	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-	{ Mod1Mask,             XK_u,           zoom,           {.f = -1} },
-	{ Mod1Mask,             XK_i,           zoomreset,      {.f =  0} },
-	{ Mod1Mask,             XK_o,           zoom,           {.f = +1} },
-	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
-	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
-	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
-	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
-	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
-  { TERMMOD,              XK_K,           kscrollup,      {.i = -1} },
-  { TERMMOD,              XK_J,           kscrolldown,    {.i = -1} },
-  { TERMMOD,              XK_I,           iso14755,       {.i =  0} },
-	{ TERMMOD,              XK_S,           cyclefonts,     {}        },
-	{ TERMMOD,              XK_X,           refreshxrandr,  {.i =  0} },
-	{ MODKEY|ShiftMask,     XK_E,           externalpipe,   {.v = edit_screen} },
-	{ MODKEY|ShiftMask,     XK_G,           externalpipe,   {.v = grab_link} },
-	{ MODKEY|ShiftMask,     XK_T,           externalpipe,   {.v = change_theme} },
-	{ MODKEY,               XK_Escape,      normalMode,     {.i =  0} },
- 	{ MODKEY|ShiftMask,     XK_F1,          loadpalette,    {.i =  1} },
- 	{ MODKEY|ShiftMask,     XK_F2,          savepalette,    {}        },
- 	{ MODKEY,               XK_F1,          setpalette,     {.i = -1} },
- 	{ MODKEY,               XK_F2,          setpalette,     {.i = +1} },
+	/* mask                  keysym          function        argument */
+	{ XK_ANY_MOD,            XK_Break,       sendbreak,      {.i =  0} },
+	{ ControlMask,           XK_Print,       toggleprinter,  {.i =  0} },
+	{ ShiftMask,             XK_Print,       printscreen,    {.i =  0} },
+	{ XK_ANY_MOD,            XK_Print,       printsel,       {.i =  0} },
+	{ TERMMOD,               XK_U,           zoom,           {.f = -1} },
+	{ TERMMOD,               XK_I,           zoomreset,      {.f =  0} },
+	{ TERMMOD,               XK_O,           zoom,           {.f = +1} },
+	{ TERMMOD,               XK_C,           clipcopy,       {.i =  0} },
+	{ TERMMOD,               XK_V,           clippaste,      {.i =  0} },
+	{ TERMMOD,               XK_Y,           selpaste,       {.i =  0} },
+  // { ControlMask|ShiftMask, XK_K,           kscrollup,      {.i = -1} },
+  // { ControlMask|ShiftMask, XK_J,           kscrolldown,    {.i = -1} },
+  { ControlMask|ShiftMask, XK_I,           iso14755,       {.i =  0} },
+	{ ControlMask|ShiftMask, XK_X,           refreshxrandr,  {.i =  0} },
+	{ TERMMOD,               XK_S,           cyclefonts,     {}        },
+	{ TERMMOD,               XK_E,           externalpipe,   {.v = edit_screen} },
+	{ TERMMOD,               XK_G,           externalpipe,   {.v = grab_link} },
+	{ TERMMOD,               XK_T,           externalpipe,   {.v = change_theme} },
+ 	{ TERMMOD,               XK_F1,          loadpalette,    {.i =  1} },
+ 	{ TERMMOD,               XK_F2,          savepalette,    {}        },
+ 	{ MODKEY,                XK_F1,          setpalette,     {.i = -1} },
+ 	{ MODKEY,                XK_F2,          setpalette,     {.i = +1} },
+	{ MODKEY,                XK_Escape,      normalMode,     {.i =  0} },
 };
 
 /*
