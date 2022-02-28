@@ -251,7 +251,7 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,               XK_Y,           selpaste,       {.i =  0} },
   // { ControlMask|ShiftMask, XK_K,           kscrollup,      {.i = -1} },
   // { ControlMask|ShiftMask, XK_J,           kscrolldown,    {.i = -1} },
-  { ControlMask|ShiftMask, XK_I,           iso14755,       {.i =  0} },
+    { ControlMask|ShiftMask, XK_I,           iso14755,       {.i =  0} },
 	{ ControlMask|ShiftMask, XK_X,           refreshxrandr,  {.i =  0} },
 	{ TERMMOD,               XK_S,           cyclefonts,     {}        },
 	{ TERMMOD,               XK_E,           externalpipe,   {.v = edit_screen} },
@@ -262,6 +262,7 @@ static Shortcut shortcuts[] = {
  	{ MODKEY,                XK_F1,          setpalette,     {.i = -1} },
  	{ MODKEY,                XK_F2,          setpalette,     {.i = +1} },
 	{ MODKEY,                XK_Escape,      normalMode,     {.i =  0} },
+	{ TERMMOD,               XK_R,           zoom,           {.f =  0} },
 };
 
 /*
