@@ -64,14 +64,6 @@ static void selpaste(const Arg *);
 static void zoom(const Arg *);
 static void zoomabs(const Arg *);
 static void zoomreset(const Arg *);
-static const char* getuserhomedir(const char*);
-static const char* getcurrentuserhomedir(void);
-char* untildepath(const char*);
-char* buildpath(const char*);
-char* buildfile(const char*);
-static void loadpalette(const Arg *);
-static void savepalette();
-static void setpalette(const Arg *);
 static void ttysend(const Arg *);
 static void cyclefonts(const Arg *);
 
@@ -2214,159 +2206,6 @@ usage(void)
 	    " [stty_args ...]\n", argv0, argv0);
 }
 
-static const char*
-getuserhomedir(const char *user)
-{
-	struct passwd *pw = getpwnam(user);
-
-	if (!pw)
-		die("Can't get user %s login information.\n", user);
-
-	return pw->pw_dir;
-}
-
-static const char*
-getcurrentuserhomedir(void)
-{
-	const char *homedir;
-	const char *user;
-	struct passwd *pw;
-
-	homedir = getenv("HOME");
-	if (homedir)
-		return homedir;
-
-	user = getenv("USER");
-	if (user)
-		return getuserhomedir(user);
-
-	pw = getpwuid(getuid());
-	if (!pw)
-		die("Can't get current user home directory\n");
-
-	return pw->pw_dir;
-}
-
-char *
-untildepath(const char *path)
-{
-  char *apath, *name, *p;
-  const char *homedir;
-
-  if (path[1] == '/' || path[1] == '\0') {
-    p = (char *)&path[1];
-    homedir = getcurrentuserhomedir();
-  } else {
-    if ((p = strchr(path, '/')))
-      name = g_strndup(&path[1], p - (path + 1));
-    else
-      name = g_strdup(&path[1]);
-
-    homedir = getuserhomedir(name);
-    g_free(name);
-  }
-  apath = g_build_filename(homedir, p, NULL);
-  return apath;
-}
-
-char *
-buildpath(const char *path)
-{
-	char *apath, *fpath;
-
-	if (path[0] == '~')
-		apath = untildepath(path);
-	else
-		apath = g_strdup(path);
-
-	/* creating directory */
-	if (g_mkdir_with_parents(apath, 0700) < 0)
-		die("Could not access directory: %s\n", apath);
-
-	fpath = realpath(apath, NULL);
-	g_free(apath);
-
-	return fpath;
-}
-
-char *
-buildfile(const char *path)
-{
-	char *dname, *bname, *bpath, *fpath;
-	FILE *f;
-
-	dname = g_path_get_dirname(path);
-	bname = g_path_get_basename(path);
-
-	bpath = buildpath(dname);
-	g_free(dname);
-
-	fpath = g_build_filename(bpath, bname, NULL);
-	g_free(bpath);
-	g_free(bname);
-
-	if (!(f = fopen(fpath, "a")))
-		die("Could not open file: %s\n", fpath);
-
-	g_chmod(fpath, 0600); /* always */
-	fclose(f);
-
-	return fpath;
-}
-
-void
-savepalette()
-{
-  char* fpath = buildfile(themefile);
-  FILE *fp;
-  char buff[255];
-  fp = fopen(fpath, "w+");
-  if (fp == NULL)
-  {
-    fprintf(stderr, "Error while opening %s.\n", fpath);
-    perror("");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(buff, "%d %s", colorindex, colorname[20]);
-  fputs(buff, fp);
-  fclose(fp);
-}
-
-void
-loadpalette(const Arg* arg)
-{
-  char* fpath = buildfile(themefile);
-  FILE *fp;
-  char name[128];
-  fp = fopen(fpath, "r");
-  if (fp == NULL)
-  {
-    fprintf(stderr, "Error while opening %s.\n", fpath);
-    perror("");
-    colorindex = 0;
-  } else {
-    fscanf(fp, "%d %s", &colorindex, name);
-    fclose(fp);
-  }
-  colorname = (const char**)palette[colorindex];
-
-  if (arg->i == 1){
-    xloadcols();
-    cresize(win.w, win.h);
-  }
-}
-
-void
-setpalette(const Arg *arg)
-{
-    colorindex = colorindex + arg->i;
-    if (colorindex < 0) colorindex = LEN(palette) - 1;
-    if (colorindex > LEN(palette) - 1) colorindex = 0;
-    colorname = palette[colorindex];
-    xloadcols();
-    cresize(win.w, win.h);
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -2436,8 +2275,6 @@ main(int argc, char *argv[])
     Arg _a;
     _a.i = 0;
 run:
-    loadpalette(&_a);
-
 	if (argc > 0) /* eat all remaining arguments */
 		opt_cmd = argv;
 
@@ -2457,4 +2294,3 @@ run:
 
 	return 0;
 }
-
