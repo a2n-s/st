@@ -1,11 +1,16 @@
 /* See LICENSE file for copyright and license details. */
-
+static char* themefile = "~/.config/st/theme.txt";
 /*
  * appearance
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+static char *fonts[] = {
+	"mononoki Nerd Font-16",
+	"Liberation Mono:pixelsize=12:antialias=true:autohint=true",
+	"Gohu GohuFont:pixelsize=11:antialias=false:autohint=false",
+};
+static size_t currentfont = 0;
 static int borderpx = 2;
 
 /*
@@ -65,13 +70,31 @@ static unsigned int blinktimeout = 800;
 /*
  * thickness of underline and bar cursors
  */
-static unsigned int cursorthickness = 2;
+static unsigned int cursorthickness = 4;
 
 /*
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
  * it
  */
 static int bellvolume = 0;
+
+/* visual-bell timeout in ms (0 to disable visual-bell) */
+static int vbelltimeout = 150;
+
+/* choose predefined visual-bell cells to inverse, or define your own logic */
+#define VBCELL x==0 || x==right || y==0 || y==bottom  /* border */
+// #define VBCELL 1  /* all cells - whole screen */
+// #define VBCELL y==bottom && x>right-2  /* bottom-right */
+static int vbellmode = 0;
+/* vbellmode: 0: invert cells. 1: draw a circle with these parameters:
+ * - base and outline colors (colorname index - see below)
+ * - radius: relative to window width, or if negative: relative to cell-width
+ * - position: relative to window width/height (0 and 1 are at the edges) */
+static int vbellcolor = 3;
+static int vbellcolor_outline = 1;
+static float vbellradius = 0.01;
+static float vbellx = 0.95;
+static float vbelly = 0.95;
 
 /* default TERM value */
 char *termname = "st-256color";
@@ -94,54 +117,76 @@ char *termname = "st-256color";
 unsigned int tabspaces = 8;
 
 /* Terminal colors (16 first used in escape sequence) */
+// THEME: Cobalt_Neon
 static const char *colorname[] = {
-	/* 8 normal colors */
-	"black",
-	"red3",
-	"green3",
-	"yellow3",
-	"blue2",
-	"magenta3",
-	"cyan3",
-	"gray90",
-
-	/* 8 bright colors */
-	"gray50",
-	"red",
-	"green",
-	"yellow",
-	"#5c5cff",
-	"magenta",
-	"cyan",
-	"white",
-
-	[255] = 0,
-
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#cccccc",
-	"#555555",
-	"gray90", /* default foreground colour */
-	"black", /* default background colour */
+  [0] = "#142630",
+  [1] = "#ff2320",
+  [2] = "#3aa5ff",
+  [3] = "#e9e75c",
+  [4] = "#8ff586",
+  [5] = "#781aa0",
+  [6] = "#8ff586",
+  [7] = "#ba45b1",
+  [8] = "#fff688",
+  [9] = "#d4312e",
+  [10] = "#8ff586",
+  [11] = "#e9f06d",
+  [12] = "#3c7dd2",
+  [13] = "#8230a7",
+  [14] = "#6cbc67",
+  [15] = "#8ff586",
+  [16] = "#142838",
+  [17] = "#8ff586",
 };
-
 
 /*
  * Default colors (colorname index)
  * foreground, background, cursor, reverse cursor
  */
-unsigned int defaultfg = 258;
-unsigned int defaultbg = 259;
-unsigned int defaultcs = 256;
-static unsigned int defaultrcs = 257;
+unsigned int defaultfg = 17;
+unsigned int defaultbg = 16;
+unsigned int defaultcs = 17;
+static unsigned int defaultrcs = 17;
+
+unsigned int const currentBg = 18, buffSize = 2048;
+/// Enable double / triple click yanking / selection of word / line.
+int const mouseYank = 1, mouseSelect = 0;
+/// [Vim Browse] Colors for search results currently on screen.
+unsigned int const highlightBg = 1, highlightFg = 18;
+char const wDelS[] = "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~", wDelL[] = " \t";
+char *nmKeys [] = {              ///< Shortcusts executed in normal mode
+  "R/Building\nN", "r/Building\n", "X/juli@machine\nN", "x/juli@machine\n",
+  "Q?[Leaving vim, starting execution]\n","F/: error:\nN", "f/: error:\n", "DQf"
+};
+unsigned int const amountNmKeys = sizeof(nmKeys) / sizeof(*nmKeys);
+/// Style of the {command, search} string shown in the right corner (y,v,V,/)
+Glyph styleSearch = {' ', ATTR_ITALIC | ATTR_BOLD_FAINT, 7, 16};
+Glyph style[] = {{' ',ATTR_ITALIC|ATTR_FAINT,15,16}, {' ',ATTR_ITALIC,232,11},
+                 {' ', ATTR_ITALIC, 232, 4}, {' ', ATTR_ITALIC, 232, 12}};
 
 /*
- * Default shape of cursor
- * 2: Block ("█")
- * 4: Underline ("_")
- * 6: Bar ("|")
- * 7: Snowman ("☃")
+* Colors used, when the specific fg == defaultfg. So in reverse mode this
+* will reverse too. Another logic would only make the simple feature too
+* complex.
+*/
+unsigned int defaultitalic = 7;
+unsigned int defaultunderline = 7;
+/*
+/*
+ * https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h4-Functions-using-CSI-_-ordered-by-the-final-character-lparen-s-rparen:CSI-Ps-SP-q.1D81
+ * Default style of cursor
+ * 0: blinking block
+ * 1: blinking block (default)
+ * 2: steady block ("█")
+ * 3: blinking underline
+ * 4: steady underline ("_")
+ * 5: blinking bar
+ * 6: steady bar ("|")
+ * 7: blinking st cursor
+ * 8: steady st cursor
  */
-static unsigned int cursorshape = 2;
+static unsigned int cursorstyle = 3;
+static Rune stcursor = 0x2603; /* snowman ("☃") */
 
 /*
  * Default columns and rows numbers
@@ -183,9 +228,17 @@ static MouseShortcut mshortcuts[] = {
 	{ XK_ANY_MOD,           Button5, ttysend,        {.s = "\005"} },
 };
 
+static char *edit_screen[] = { "/bin/sh", "-c",
+	"~/.config/st/edit_screen",
+	"edit_screen", NULL };
+
+static char *grab_link[] = { "/bin/sh", "-c",
+	"~/.config/st/grab_link",
+	"grab_link", NULL };
+
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
-#define TERMMOD (ControlMask|ShiftMask)
+#define TERMMOD (Mod1Mask|ShiftMask)
 
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function        argument */
@@ -193,14 +246,22 @@ static Shortcut shortcuts[] = {
 	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
 	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
 	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-	{ TERMMOD,              XK_Prior,       zoom,           {.f = +1} },
-	{ TERMMOD,              XK_Next,        zoom,           {.f = -1} },
-	{ TERMMOD,              XK_Home,        zoomreset,      {.f =  0} },
+	{ Mod1Mask,             XK_u,           zoom,           {.f = -1} },
+	{ Mod1Mask,             XK_i,           zoomreset,      {.f =  0} },
+	{ Mod1Mask,             XK_o,           zoom,           {.f = +1} },
 	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
 	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
 	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
 	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
 	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
+    { TERMMOD,              XK_K,           kscrollup,      {.i = -1} },
+    { TERMMOD,              XK_J,           kscrolldown,    {.i = -1} },
+    { TERMMOD,              XK_I,           iso14755,       {.i =  0} },
+	{ TERMMOD,              XK_S,           cyclefonts,     {}        },
+	{ TERMMOD,              XK_E,           externalpipe,   {.v = edit_screen} },
+	{ TERMMOD,              XK_G,           externalpipe,   {.v = grab_link} },
+	{ MODKEY,               XK_Escape,      normalMode,     {.i =  0} },
+	{ TERMMOD,              XK_R,           zoom,           {.f =  0} },
 };
 
 /*
